@@ -1,0 +1,58 @@
+<!-- -*- mode: XML -*- -->
+<launch>
+  <arg name="manager" default="camera_manager"/>
+
+  <node pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen"/>
+
+  <!-- Start Intel Realsense T265 -->
+  <group ns="camera">
+      <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
+          <arg name="external_manager" value="true"/>
+          <arg name="manager" value="/$(arg manager)"/>
+          <arg name="tf_prefix" value="camera"/>
+          <arg name="device_type" value="t265"/>
+          <arg name="enable_fisheye1" value="true"/>
+          <arg name="enable_fisheye2" value="true"/>
+          <arg name="publish_odom_tf" value="true"/>
+          <arg name="initial_reset" value="true"/>
+      </include>
+      <rosparam>tracking_module/enable_relocalization: false</rosparam>
+      <rosparam>tracking_module/enable_pose_jumping: false</rosparam>
+  </group>
+
+  <arg name="input_camera1_name" default="/camera/fisheye1" />
+  <arg name="input_camera2_name" default="/camera/fisheye2" />
+
+  <!-- Rectify Image -->
+  <group ns="image_processing">
+      <node pkg="nodelet" type="nodelet" name="ImageUndistortNodelet1" args="load image_undistort/ImageUndistortNodelet /$(arg manager)" output="screen">
+          <param name="scale" value="0.5"/>
+          <param name="output_camera_info_source" value="match_input" />
+          <remap from="input/image" to="$(arg input_camera1_name)/image_raw"/>
+          <remap from="input/camera_info" to="$(arg input_camera1_name)/camera_info"/>
+          <remap from="output/image" to="left/image_rect"/>
+          <remap from="output/camera_info" to="left/camera_info"/>
+      </node>
+  </group>
+
+  <!-- RVIZ -->
+  <node pkg="rviz" name="rviz" type="rviz" args="-d $(find real_localization)/rviz/rviz.rviz" output="screen"/>
+
+  <!-- Run AprilTag detection -->
+  <arg name="camera_name" default="/image_processing/left" />
+  <arg name="image_topic" default="image_rect" />
+  <arg name="queue_size" default="1" />
+
+  <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" name="continuous_detection_node" clear_params="true" output="screen">
+    <remap from="image_rect" to="$(arg camera_name)/$(arg image_topic)" />
+    <remap from="camera_info" to="$(arg camera_name)/camera_info" />
+
+    <param name="publish_tag_detections_image" type="bool" value="true" /><!-- default: false -->
+    <param name="queue_size" type="int" value="$(arg queue_size)" />
+
+    <rosparam command="load" file="$(find apriltag_ros)/config/settings.yaml"/>
+    <rosparam command="load" file="$(find apriltag_ros)/config/tags.yaml"/>
+  </node>
+  
+  
+</launch>
