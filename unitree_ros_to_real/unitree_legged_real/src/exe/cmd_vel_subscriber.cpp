@@ -76,7 +76,7 @@ int mainHelper(int argc, char *argv[], TLCM &roslcm) {
     pthread_t tid;
     pthread_create(&tid, NULL, update_loop<TLCM>, &roslcm);
 
-    ros::Subscriber sub = n.subscribe("cmd_vel", 1, cmdVelCallback);
+    ros::Subscriber sub = n.subscribe("codog0/cmd_vel/smooth", 1, cmdVelCallback);
 
     SendHighROS.forwardSpeed = 0.0f;
     SendHighROS.sideSpeed = 0.0f;

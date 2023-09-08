@@ -49,10 +49,24 @@
 
     <param name="publish_tag_detections_image" type="bool" value="true" /><!-- default: false -->
     <param name="queue_size" type="int" value="$(arg queue_size)" />
+    <param name="camera_frame" type="string" value="camera_pose" />
 
     <rosparam command="load" file="$(find apriltag_ros)/config/settings.yaml"/>
     <rosparam command="load" file="$(find apriltag_ros)/config/tags.yaml"/>
   </node>
-  
+
+  <!-- static transform from T265 odometry to center of robot -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="robot_pose_tf"
+        args="0 0 0 3.14 0 0 camera_link dogp0" />
+  <!-- static transform from apriltag to center of box -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="box_pose_tf"
+      args="0 0 0 0 -1.57 -1.57 apriltag_box box_p" />
+
+  <!-- Publish world frame based off the initial odom frame -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="world_frame_tf"
+    args="0 0 0 3.14 0 0 camera_odom_frame world_frame" />
+
+  <!-- Converts the tf frames to messages taken in by mappo -->
+  <node pkg="real_localization" type="tf_to_codogs.py" name="tf_to_codogs_node" output="screen"/>
   
 </launch>
