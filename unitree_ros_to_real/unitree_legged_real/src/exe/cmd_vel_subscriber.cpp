@@ -55,9 +55,12 @@ unitree_legged_msgs::HighCmd rosMsg2Cmd(const geometry_msgs::Twist::ConstPtr &ms
 
 unitree_legged_msgs::HighCmd SendHighROS;
 
+// timeout on last cmd_vel
+ros::Time last_received_time;
+
 void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg) {
     SendHighROS = rosMsg2Cmd(msg);
-    
+    last_received_time = ros::Time::now();
 }
 
 template<typename TCmd, typename TState, typename TLCM>
@@ -88,13 +91,42 @@ int mainHelper(int argc, char *argv[], TLCM &roslcm) {
     SendHighROS.pitch = 0;
     SendHighROS.yaw = 0;
 
+    last_received_time = ros::Time::now();
+    double time_elapsed = 0;
+
     while (ros::ok()){
+
         roslcm.Get(RecvHighLCM);
         RecvHighROS = ToRos(RecvHighLCM);
-        printf("{%f, %f, %f, %d} \n",  RecvHighROS.forwardSpeed, RecvHighROS.sideSpeed, RecvHighROS.rotateSpeed, RecvHighROS.mode);
+        // printf("{%f, %f, %f, %d} \n",  RecvHighROS.forwardSpeed, RecvHighROS.sideSpeed, RecvHighROS.rotateSpeed, RecvHighROS.mode);
+        
+        time_elapsed = (ros::Time::now() - last_received_time).toSec();
+        if (time_elapsed > 1.0) {
+            SendHighROS.forwardSpeed = 0.0f;
+            SendHighROS.sideSpeed = 0.0f;
+            SendHighROS.rotateSpeed = 0.0f;
+            SendHighROS.bodyHeight = 0.0f;
 
-        SendHighLCM = ToLcm(SendHighROS, SendHighLCM);
-        roslcm.Send(SendHighLCM);
+            SendHighROS.mode = 0;
+            SendHighROS.roll  = 0;
+            SendHighROS.pitch = 0;
+            SendHighROS.yaw = 0;
+
+            roslcm.Get(RecvHighLCM);
+            RecvHighROS = ToRos(RecvHighLCM);
+            // printf("{%f, %f, %f, %d} \n",  RecvHighROS.forwardSpeed, RecvHighROS.sideSpeed, RecvHighROS.rotateSpeed, RecvHighROS.mode);
+
+            SendHighLCM = ToLcm(SendHighROS, SendHighLCM);
+            roslcm.Send(SendHighLCM);
+            printf("timeout reached %f \n", time_elapsed);
+        } else {
+            SendHighLCM = ToLcm(SendHighROS, SendHighLCM);
+            roslcm.Send(SendHighLCM);
+        }
+
+        if (time_elapsed > 5.0) {
+            ros::shutdown();
+        }
         ros::spinOnce();
         loop_rate.sleep(); 
     }

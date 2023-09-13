@@ -21,7 +21,7 @@ def main():
         try:
             # Get transform
             try:
-                trans = tf_buffer.lookup_transform("world_frame", "dogp0", rospy.Time(0))
+                trans = tf_buffer.lookup_transform("world", "dogp0", rospy.Time(0))
             except(tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
                 continue
             
@@ -44,7 +44,7 @@ def main():
             dogp0_pub.publish(dogp0_msg)
 
             try:
-                trans = tf_buffer.lookup_transform("world_frame", "box_p", rospy.Time(0))
+                trans = tf_buffer.lookup_transform("world", "box_p", rospy.Time(0))
             except(tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
                 continue
             

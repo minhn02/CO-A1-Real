@@ -4,12 +4,15 @@
 
   <node pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen"/>
 
+  <!-- Start Intel D435i -->
+  <include file="$(find realsense2_camera)/launch/rs_camera.launch"/>
+
   <!-- Start Intel Realsense T265 -->
-  <group ns="camera">
+  <!-- <group ns="camera_odom">
       <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
           <arg name="external_manager" value="true"/>
           <arg name="manager" value="/$(arg manager)"/>
-          <arg name="tf_prefix" value="camera"/>
+          <arg name="tf_prefix" value="camera_odom"/>
           <arg name="device_type" value="t265"/>
           <arg name="enable_fisheye1" value="true"/>
           <arg name="enable_fisheye2" value="true"/>
@@ -18,29 +21,14 @@
       </include>
       <rosparam>tracking_module/enable_relocalization: false</rosparam>
       <rosparam>tracking_module/enable_pose_jumping: false</rosparam>
-  </group>
-
-  <arg name="input_camera1_name" default="/camera/fisheye1" />
-  <arg name="input_camera2_name" default="/camera/fisheye2" />
-
-  <!-- Rectify Image -->
-  <group ns="image_processing">
-      <node pkg="nodelet" type="nodelet" name="ImageUndistortNodelet1" args="load image_undistort/ImageUndistortNodelet /$(arg manager)" output="screen">
-          <param name="scale" value="0.5"/>
-          <param name="output_camera_info_source" value="match_input" />
-          <remap from="input/image" to="$(arg input_camera1_name)/image_raw"/>
-          <remap from="input/camera_info" to="$(arg input_camera1_name)/camera_info"/>
-          <remap from="output/image" to="left/image_rect"/>
-          <remap from="output/camera_info" to="left/camera_info"/>
-      </node>
-  </group>
+  </group> -->
 
   <!-- RVIZ -->
   <node pkg="rviz" name="rviz" type="rviz" args="-d $(find real_localization)/rviz/rviz.rviz" output="screen"/>
 
   <!-- Run AprilTag detection -->
-  <arg name="camera_name" default="/image_processing/left" />
-  <arg name="image_topic" default="image_rect" />
+  <arg name="camera_name" default="camera/color" />
+  <arg name="image_topic" default="image_raw" />
   <arg name="queue_size" default="1" />
 
   <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" name="continuous_detection_node" clear_params="true" output="screen">
@@ -49,24 +37,24 @@
 
     <param name="publish_tag_detections_image" type="bool" value="true" /><!-- default: false -->
     <param name="queue_size" type="int" value="$(arg queue_size)" />
-    <param name="camera_frame" type="string" value="camera_pose" />
 
     <rosparam command="load" file="$(find apriltag_ros)/config/settings.yaml"/>
     <rosparam command="load" file="$(find apriltag_ros)/config/tags.yaml"/>
   </node>
 
   <!-- static transform from T265 odometry to center of robot -->
-  <node pkg="tf2_ros" type="static_transform_publisher" name="robot_pose_tf"
-        args="0 0 0 3.14 0 0 camera_link dogp0" />
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="robot_pose_tf"
+        args="-0.8 0 0 3.14 0 0 camera_link dogp0" /> -->
+
   <!-- static transform from apriltag to center of box -->
   <node pkg="tf2_ros" type="static_transform_publisher" name="box_pose_tf"
-      args="0 0 0 0 -1.57 -1.57 apriltag_box box_p" />
+      args="-0.26 0 0 0 -1.57 -1.57 apriltag_box box_p" />
 
-  <!-- Publish world frame based off the initial odom frame -->
-  <node pkg="tf2_ros" type="static_transform_publisher" name="world_frame_tf"
-    args="0 0 0 3.14 0 0 camera_odom_frame world_frame" />
+  <!-- static transform from the world frame to the center of the robot(s) -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="world_frame_tf"
+    args="0 1 0 0 0 0 camera_odom_frame world_frame" /> -->
 
   <!-- Converts the tf frames to messages taken in by mappo -->
-  <node pkg="real_localization" type="tf_to_codogs.py" name="tf_to_codogs_node" output="screen"/>
+  <!-- <node pkg="real_localization" type="tf_to_codogs.py" name="tf_to_codogs_node" output="screen"/> -->
   
 </launch>
