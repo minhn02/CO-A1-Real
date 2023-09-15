@@ -8,7 +8,7 @@
   <include file="$(find realsense2_camera)/launch/rs_camera.launch"/>
 
   <!-- Start Intel Realsense T265 -->
-  <!-- <group ns="camera_odom">
+  <group ns="camera_dog0">
       <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
           <arg name="external_manager" value="true"/>
           <arg name="manager" value="/$(arg manager)"/>
@@ -21,13 +21,13 @@
       </include>
       <rosparam>tracking_module/enable_relocalization: false</rosparam>
       <rosparam>tracking_module/enable_pose_jumping: false</rosparam>
-  </group> -->
+  </group>
 
   <!-- RVIZ -->
   <node pkg="rviz" name="rviz" type="rviz" args="-d $(find real_localization)/rviz/rviz.rviz" output="screen"/>
 
   <!-- Run AprilTag detection -->
-  <arg name="camera_name" default="camera/color" />
+  <arg name="camera_name" default="/camera/color" />
   <arg name="image_topic" default="image_raw" />
   <arg name="queue_size" default="1" />
 
@@ -43,16 +43,16 @@
   </node>
 
   <!-- static transform from T265 odometry to center of robot -->
-  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="robot_pose_tf"
-        args="-0.8 0 0 3.14 0 0 camera_link dogp0" /> -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="robot_pose_tf"
+        args="-0.8 0 0 3.14 0 0 camera_dogp0_link dogp0" />
 
   <!-- static transform from apriltag to center of box -->
   <node pkg="tf2_ros" type="static_transform_publisher" name="box_pose_tf"
-      args="-0.26 0 0 0 -1.57 -1.57 apriltag_box box_p" />
+      args="0 0 -0.3 0 0 0 apriltag_box box_p" />
 
   <!-- static transform from the world frame to the center of the robot(s) -->
-  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="world_frame_tf"
-    args="0 1 0 0 0 0 camera_odom_frame world_frame" /> -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="world_frame_tf"
+    args="0 -1 0 0 0 0 camera_dog_p0_link world" />
 
   <!-- Converts the tf frames to messages taken in by mappo -->
   <!-- <node pkg="real_localization" type="tf_to_codogs.py" name="tf_to_codogs_node" output="screen"/> -->
