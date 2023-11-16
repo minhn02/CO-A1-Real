@@ -15,8 +15,12 @@ def main():
     tf_buffer1 = tf2_ros.Buffer()
     tf_listener1 = tf2_ros.TransformListener(tf_buffer1)
 
+    tf_buffer2 = tf2_ros.Buffer()
+    tf_listener2 = tf2_ros.TransformListener(tf_buffer2)
+
     dogp0_pub = rospy.Publisher('dog_p0', rl_obj, queue_size=10)
     dogp1_pub = rospy.Publisher('dog_p1', rl_obj, queue_size=10)
+    dogp2_pub = rospy.Publisher('dog_p3', rl_obj, queue_size=10)
 
     rate = rospy.Rate(30)
 
@@ -25,6 +29,7 @@ def main():
         try:
             trans0 = tf_buffer0.lookup_transform("world", "dogp0", rospy.Time(0), rospy.Duration(1.0))
             trans1 = tf_buffer1.lookup_transform("world", "dogp1", rospy.Time(0), rospy.Duration(1.0))
+            trans2 = tf_buffer1.lookup_transform("world", "dogp2", rospy.Time(0), rospy.Duration(1.0))
         except(tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as ex:
             rate.sleep()
             continue
@@ -63,6 +68,23 @@ def main():
 
         # Publish Point
         dogp1_pub.publish(dogp1_msg)
+
+        dogp2_msg = rl_obj()
+        dogp2_msg.center_x = trans2.transform.translation.x
+        dogp2_msg.center_y = trans2.transform.translation.y
+        quaternion2 = (
+            trans2.transform.rotation.x,
+            trans2.transform.rotation.y,
+            trans2.transform.rotation.z,
+            trans2.transform.rotation.w
+        )
+
+        euler_angles2 = tf.transformations.euler_from_quaternion(quaternion2)
+        yaw2 = euler_angles2[2]
+        dogp2_msg.yaw = yaw2
+
+        # Publish Point
+        dogp2_pub.publish(dogp2_msg)
         
         rate.sleep()
 

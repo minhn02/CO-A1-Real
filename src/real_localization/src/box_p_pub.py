@@ -19,7 +19,7 @@ def main():
     while not rospy.is_shutdown():
         # Get transform
         try:
-            trans = tf_buffer.lookup_transform("world", "box_p", rospy.Time(0), rospy.Duration(1.0))
+            trans = tf_buffer.lookup_transform("world", "box_center", rospy.Time(0), rospy.Duration(1.0))
         except(tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as ex:
             rate.sleep()
             continue
