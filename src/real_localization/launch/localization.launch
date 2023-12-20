@@ -39,7 +39,7 @@
         args="-0.25 0 0 0 0 0 camera_dog1_link dogp1" />
 
   <node pkg="tf2_ros" type="static_transform_publisher" name="robot2_pose_tf"
-        args="-0.13 0 0 3.14 0 0 camera_dog2_link dogp2" />
+        args="-0.13 0 0 0 0 0 camera_dog2_link dogp2" />
 
   <!-- static transform from the world frame to the odom frame of the cameras(s) -->
   <node pkg="tf2_ros" type="static_transform_publisher" name="world0_frame_tf"
@@ -49,7 +49,7 @@
     args="1.215 1.641 0 0 0 0 world camera_dog1_odom_frame " />
 
   <node pkg="tf2_ros" type="static_transform_publisher" name="world2_frame_tf"
-    args="0.885 0.029 0 3.14 0 0 world camera_dog2_odom_frame " />
+    args="1.055 0.029 0 0 0 0 world camera_dog2_odom_frame " />
 
   <!-- Converts the tf frames to messages taken in by mappo -->
   <node pkg="real_localization" type="box_p_pub.py" name="box_p_pub_node" output="screen"/>

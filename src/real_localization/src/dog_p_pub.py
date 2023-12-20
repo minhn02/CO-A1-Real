@@ -18,9 +18,13 @@ def main():
     tf_buffer2 = tf2_ros.Buffer()
     tf_listener2 = tf2_ros.TransformListener(tf_buffer2)
 
+    tf_buffer3 = tf2_ros.Buffer()
+    tf_listener3 = tf2_ros.TransformListener(tf_buffer3)
+
     dogp0_pub = rospy.Publisher('dog_p0', rl_obj, queue_size=10)
     dogp1_pub = rospy.Publisher('dog_p1', rl_obj, queue_size=10)
-    dogp2_pub = rospy.Publisher('dog_p3', rl_obj, queue_size=10)
+    dogp2_pub = rospy.Publisher('dog_p2', rl_obj, queue_size=10)
+    dogp3_pub = rospy.Publisher('dog_p3', rl_obj, queue_size=10)
 
     rate = rospy.Rate(30)
 
@@ -29,7 +33,8 @@ def main():
         try:
             trans0 = tf_buffer0.lookup_transform("world", "dogp0", rospy.Time(0), rospy.Duration(1.0))
             trans1 = tf_buffer1.lookup_transform("world", "dogp1", rospy.Time(0), rospy.Duration(1.0))
-            trans2 = tf_buffer1.lookup_transform("world", "dogp2", rospy.Time(0), rospy.Duration(1.0))
+            trans2 = tf_buffer2.lookup_transform("world", "dogp2", rospy.Time(0), rospy.Duration(1.0))
+            trans3 = tf_buffer3.lookup_transform("world", "dogp3", rospy.Time(0), rospy.Duration(1.0))
         except(tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as ex:
             rate.sleep()
             continue
@@ -85,6 +90,23 @@ def main():
 
         # Publish Point
         dogp2_pub.publish(dogp2_msg)
+
+        dogp3_msg = rl_obj()
+        dogp3_msg.center_x = trans3.transform.translation.x
+        dogp3_msg.center_y = trans3.transform.translation.y
+        quaternion3 = (
+            trans3.transform.rotation.x,
+            trans3.transform.rotation.y,
+            trans3.transform.rotation.z,
+            trans3.transform.rotation.w
+        )
+
+        euler_angles3 = tf.transformations.euler_from_quaternion(quaternion3)
+        yaw3 = euler_angles3[3]
+        dogp3_msg.yaw = yaw3
+
+        # Publish Point
+        dogp3_pub.publish(dogp3_msg)
         
         rate.sleep()
 
