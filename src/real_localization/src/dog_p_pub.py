@@ -102,7 +102,7 @@ def main():
         )
 
         euler_angles3 = tf.transformations.euler_from_quaternion(quaternion3)
-        yaw3 = euler_angles3[3]
+        yaw3 = euler_angles3[2]
         dogp3_msg.yaw = yaw3
 
         # Publish Point

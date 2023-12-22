@@ -101,6 +101,8 @@ Visualization Manager:
       Value: true
     - Class: rviz/TF
       Enabled: true
+      Filter (blacklist): ""
+      Filter (whitelist): ""
       Frame Timeout: 15
       Frames:
         All Enabled: false
@@ -158,21 +160,33 @@ Visualization Manager:
           Value: false
         camera_dog2_pose_frame:
           Value: false
+        camera_dog3_accel_frame:
+          Value: false
+        camera_dog3_accel_optical_frame:
+          Value: false
+        camera_dog3_gyro_frame:
+          Value: false
+        camera_dog3_gyro_optical_frame:
+          Value: false
+        camera_dog3_link:
+          Value: false
+        camera_dog3_odom_frame:
+          Value: false
+        camera_dog3_pose_frame:
+          Value: false
         camera_link:
           Value: true
-        dog2_tag:
-          Value: false
         dogp0:
           Value: true
         dogp1:
           Value: true
         dogp2:
           Value: true
+        dogp3:
+          Value: true
         obstacle:
           Value: true
         obstacle_tag:
-          Value: false
-        tag_front:
           Value: false
         tag_left:
           Value: false
@@ -189,13 +203,9 @@ Visualization Manager:
         camera_link:
           camera_aligned_depth_to_color_frame:
             camera_color_optical_frame:
-              dog2_tag:
-                {}
               obstacle_tag:
                 obstacle:
                   {}
-              tag_front:
-                {}
               tag_left:
                 {}
               tag_up:
@@ -234,6 +244,17 @@ Visualization Manager:
                         camera_dog2_gyro_optical_frame:
                           {}
                       dogp2:
+                        {}
+                camera_dog3_odom_frame:
+                  camera_dog3_pose_frame:
+                    camera_dog3_link:
+                      camera_dog3_accel_frame:
+                        camera_dog3_accel_optical_frame:
+                          {}
+                      camera_dog3_gyro_frame:
+                        camera_dog3_gyro_optical_frame:
+                          {}
+                      dogp3:
                         {}
           camera_color_frame:
             {}
@@ -306,7 +327,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 3.7649545669555664
+      Distance: 7.568749904632568
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
