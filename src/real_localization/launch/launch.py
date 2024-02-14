@@ -1,4 +1,28 @@
+import rospy
+import tf2_ros
+import tf
 
+def main():
+
+    rospy.init_node('box_marker_pub_node')
+
+    # TF Buffer and Listener
+    tf_buffer = tf2_ros.Buffer()
+    tf_listener = tf2_ros.TransformListener(tf_buffer)
+
+    rate = rospy.Rate(30)
+
+    while not rospy.is_shutdown():
+        try:
+            trans = tf_buffer.lookup_transform("world","box_center", rospy.Time(0), rospy.Duration(1.0))
+        except(tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as ex:
+            rate.sleep()
+            continue
+
+        off_x = trans.transform.translation.x
+        off_y = trans.transform.translation.y
+        context = \
+        """
         <!-- -*- mode: XML -*- -->
         <launch>
         <arg name="manager" default="camera_manager"/>
@@ -53,14 +77,11 @@
         <!-- 0.65+.3 236  0.3-0.02+.8 813 0.22 0.80-->
         <!-- Remember to add +0.06 to x and y to account for center of dog to camera frame -->
         <node pkg="tf2_ros" type="static_transform_publisher" name="world0_frame_tf"
-            args="1.10979066425 -0.920939549331 0 1.57 0 0 world camera_dog0_odom_frame " />
+            args="{} {} 0 1.57 0 0 world camera_dog0_odom_frame " />
 
         <!-- Add .34 to x and subtract 0.2 from y -->
         <node pkg="tf2_ros" type="static_transform_publisher" name="world1_frame_tf"
-            args="1.29979066425 -0.0109395493307 0 3.14 0 0 world camera_dog1_odom_frame " />
-
-        <node pkg="tf2_ros" type="static_transform_publisher" name="world2_frame_tf"
-            args="1.34979066425 0.839060450669 0 0 0 0 world camera_dog2_odom_frame " />
+            args="{} {} 0 3.14 0 0 world camera_dog1_odom_frame " />
 
         <node pkg="tf2_ros" type="static_transform_publisher" name="world3_frame_tf"
             args="1.57 1.21 0 0 0 0 world camera_dog3_odom_frame " />
@@ -77,4 +98,14 @@
             args="0 0 -0.26 1.57 1.57 0 obstacle_tag obstacle " />
         
         </launch>
+        """.format(0.65-0.06+off_x, 0.-0.06+off_y, 0.+off_x, 0.65+off_y)
         
+        name_of_file = "src/real_localization/launch/localization.launch"
+        file = open(name_of_file, "w")
+        file.write(context)
+        file.close()
+        exit()
+
+
+if __name__ == "__main__":
+    main()

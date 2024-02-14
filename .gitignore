@@ -3,3 +3,6 @@ build_isolated
 devel
 devel_isolated
 .catkin_workspace
+.catkin_tools
+install
+logs

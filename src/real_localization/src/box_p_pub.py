@@ -16,18 +16,26 @@ def main():
 
     rate = rospy.Rate(30)
 
+    has_initial_offset = False
+    off_x = 0
+    off_y = 0
+
     while not rospy.is_shutdown():
         # Get transform
         try:
             trans = tf_buffer.lookup_transform("world", "box_center", rospy.Time(0), rospy.Duration(1.0))
+            if not has_initial_offset:
+                off_x = trans.transform.translation.x
+                off_y = trans.transform.translation.y
+                has_initial_offset = True
         except(tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as ex:
             rate.sleep()
             continue
         
         # Convert transform to Point message
         boxp_msg = rl_obj()
-        boxp_msg.center_x = trans.transform.translation.x
-        boxp_msg.center_y = trans.transform.translation.y
+        boxp_msg.center_x = trans.transform.translation.x - off_x
+        boxp_msg.center_y = trans.transform.translation.y - off_y
         quaternion = (
             trans.transform.rotation.x,
             trans.transform.rotation.y,

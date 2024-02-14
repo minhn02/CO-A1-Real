@@ -9,6 +9,9 @@ def main():
     rospy.init_node('dog_p_pub_node')
 
     # TF Buffer and Listener
+    tf_buffer = tf2_ros.Buffer()
+    tf_listener = tf2_ros.TransformListener(tf_buffer)
+
     tf_buffer0 = tf2_ros.Buffer()
     tf_listener0 = tf2_ros.TransformListener(tf_buffer0)
 
@@ -28,21 +31,31 @@ def main():
 
     rate = rospy.Rate(30)
 
+    has_initial_offset = False
+    off_x = 0
+    off_y = 0   
+
     while not rospy.is_shutdown():
         # Get transform
         try:
+            if not has_initial_offset:
+                trans = tf_buffer.lookup_transform("world", "box_center", rospy.Time(0), rospy.Duration(1.0))
+                off_x = trans.transform.translation.x
+                off_y = trans.transform.translation.y
+                has_initial_offset = True
+            
             trans0 = tf_buffer0.lookup_transform("world", "dogp0", rospy.Time(0), rospy.Duration(1.0))
             trans1 = tf_buffer1.lookup_transform("world", "dogp1", rospy.Time(0), rospy.Duration(1.0))
             trans2 = tf_buffer2.lookup_transform("world", "dogp2", rospy.Time(0), rospy.Duration(1.0))
-            trans3 = tf_buffer3.lookup_transform("world", "dogp3", rospy.Time(0), rospy.Duration(1.0))
+            # trans3 = tf_buffer3.lookup_transform("world", "dogp3", rospy.Time(0), rospy.Duration(1.0))
         except(tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as ex:
             rate.sleep()
             continue
         
         # Convert transform to Point message
         dogp0_msg = rl_obj()
-        dogp0_msg.center_x = trans0.transform.translation.x
-        dogp0_msg.center_y = trans0.transform.translation.y
+        dogp0_msg.center_x = trans0.transform.translation.x - off_x 
+        dogp0_msg.center_y = trans0.transform.translation.y - off_y
         quaternion0 = (
             trans0.transform.rotation.x,
             trans0.transform.rotation.y,
@@ -58,8 +71,8 @@ def main():
         dogp0_pub.publish(dogp0_msg)
 
         dogp1_msg = rl_obj()
-        dogp1_msg.center_x = trans1.transform.translation.x
-        dogp1_msg.center_y = trans1.transform.translation.y
+        dogp1_msg.center_x = trans1.transform.translation.x - off_x
+        dogp1_msg.center_y = trans1.transform.translation.y - off_y
         quaternion1 = (
             trans1.transform.rotation.x,
             trans1.transform.rotation.y,
@@ -75,8 +88,8 @@ def main():
         dogp1_pub.publish(dogp1_msg)
 
         dogp2_msg = rl_obj()
-        dogp2_msg.center_x = trans2.transform.translation.x
-        dogp2_msg.center_y = trans2.transform.translation.y
+        dogp2_msg.center_x = trans2.transform.translation.x - off_x
+        dogp2_msg.center_y = trans2.transform.translation.y - off_y
         quaternion2 = (
             trans2.transform.rotation.x,
             trans2.transform.rotation.y,
@@ -91,22 +104,22 @@ def main():
         # Publish Point
         dogp2_pub.publish(dogp2_msg)
 
-        dogp3_msg = rl_obj()
-        dogp3_msg.center_x = trans3.transform.translation.x
-        dogp3_msg.center_y = trans3.transform.translation.y
-        quaternion3 = (
-            trans3.transform.rotation.x,
-            trans3.transform.rotation.y,
-            trans3.transform.rotation.z,
-            trans3.transform.rotation.w
-        )
+        # dogp3_msg = rl_obj()
+        # dogp3_msg.center_x = trans3.transform.translation.x - off_x
+        # dogp3_msg.center_y = trans3.transform.translation.y - off_y
+        # quaternion3 = (
+        #     trans3.transform.rotation.x,
+        #     trans3.transform.rotation.y,
+        #     trans3.transform.rotation.z,
+        #     trans3.transform.rotation.w
+        # )
 
-        euler_angles3 = tf.transformations.euler_from_quaternion(quaternion3)
-        yaw3 = euler_angles3[2]
-        dogp3_msg.yaw = yaw3
+        # euler_angles3 = tf.transformations.euler_from_quaternion(quaternion3)
+        # yaw3 = euler_angles3[2]
+        # dogp3_msg.yaw = yaw3
 
-        # Publish Point
-        dogp3_pub.publish(dogp3_msg)
+        # # Publish Point
+        # dogp3_pub.publish(dogp3_msg)
         
         rate.sleep()
 

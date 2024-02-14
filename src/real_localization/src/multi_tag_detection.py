@@ -2,6 +2,7 @@
 
 import rospy
 import tf
+import tf2_ros
 from apriltag_ros.msg import AprilTagDetectionArray
 from visualization_msgs.msg import Marker
 
@@ -10,11 +11,11 @@ class MultiTagDetection:
         self.tag_msg = None
         self.__tag_ids = [0, 1, 2, 3, 6]
         self.__tag_names = ['tag_up', 'tag_back', 'tag_left', 'tag_front', 'tag_right']
-        self.__box_hwidth = 0.21
+        self.__box_hwidth = 0.25
         self.__up_to_center_quat = tf.transformations.quaternion_from_euler(0, 0, 0)
-        self.__front_to_center_quat = tf.transformations.quaternion_from_euler(-1.5708, 0, -3.14159)
-        self.__left_to_center_quat = tf.transformations.quaternion_from_euler(-1.5708, 0, 1.5708)
-        self.__back_to_center_quat = tf.transformations.quaternion_from_euler(-1.5708, 0, 0)
+        self.__front_to_center_quat = tf.transformations.quaternion_from_euler(1.57, 0.0, 3.14)
+        self.__left_to_center_quat = tf.transformations.quaternion_from_euler(-1.5708, 1.5708, 0)
+        self.__back_to_center_quat = tf.transformations.quaternion_from_euler(-1.57, 0.0, 0.0)
         self.__right_to_center_quat = tf.transformations.quaternion_from_euler(-1.5708, 0, -1.5708)
 
         self.__box_marker_pub = rospy.Publisher("/apriltag_box", Marker, queue_size=1)
@@ -22,6 +23,7 @@ class MultiTagDetection:
         self.__detected_tag_sb = rospy.Subscriber("/tag_detections", AprilTagDetectionArray, self.__detected_tag_cb)
         self.__box_center_timer = rospy.Timer(rospy.Duration(1/30.0), self.__box_center_cb)
 
+        self._off_set = 0.0
 
     def __box_center_cb(self, event):
         if self.tag_msg:
@@ -35,15 +37,17 @@ class MultiTagDetection:
                 if tag_id == 0: # up
                     # print('detect 0')
                     tag_name = self.__tag_names[0]
-                    self.__box_center_br.sendTransform((0,0,-self.__box_hwidth),
+                    self.__box_center_br.sendTransform((0.1,0,-0.2),
                                                     self.__up_to_center_quat,
                                                     rospy.Time.now(),
                                                     "box_center",
                                                     tag_name)
                 elif tag_id == 1: # back
+                    # rospy.logwarn('[box detector]: not support at this moment')
+                    # raise NotImplementationError
                     # print('detect 1')
                     tag_name = self.__tag_names[1]
-                    self.__box_center_br.sendTransform((0,0,-self.__box_hwidth),
+                    self.__box_center_br.sendTransform((0,0,-0.335),
                                                     self.__back_to_center_quat,
                                                     rospy.Time.now(),
                                                     "box_center",
@@ -51,20 +55,22 @@ class MultiTagDetection:
                 elif tag_id == 2: # left
                     # print('detect 2')
                     tag_name = self.__tag_names[2]
-                    self.__box_center_br.sendTransform((0,0,-self.__box_hwidth),
+                    self.__box_center_br.sendTransform((0,0,-0.335),
                                                     self.__left_to_center_quat,
                                                     rospy.Time.now(),
                                                     "box_center",
                                                     tag_name)
                 elif tag_id == 3: # front
+                    # rospy.logwarn('[box detector]: not support at this moment')
                     # print('detect 3')
                     tag_name = self.__tag_names[3]
-                    self.__box_center_br.sendTransform((0,0,-self.__box_hwidth),
+                    self.__box_center_br.sendTransform((0,0,-0.335),
                                                     self.__front_to_center_quat,
                                                     rospy.Time.now(),
                                                     "box_center",
                                                     tag_name)
                 elif tag_id == 6: # right
+                    rospy.logwarn('[box detector]: not support at this moment')
                     # print('detect 6')
                     tag_name = self.__tag_names[4]
                     self.__box_center_br.sendTransform((0,0,-self.__box_hwidth),
