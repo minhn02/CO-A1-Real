@@ -53,10 +53,6 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
 add_message_files(
   FILES
-  Obstacle_msg.msg
-  Obstacle_Array.msg
-  dog_controller_status.msg
-  central_planner_solution.msg
   rl_obj.msg
 )
 

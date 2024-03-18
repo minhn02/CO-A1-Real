@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="rviz" name="rviz" type="rviz" args="-d $(find real_localization)/rviz/rviz.rviz" output="screen"/>
+
+    <node pkg="real_localization" type="uwb_rl_translation_pub.py" name="uwb_translation_node" output="screen"/>
+</launch>

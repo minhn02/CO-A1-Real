@@ -163,6 +163,7 @@ catkin_install_python(PROGRAMS
   src/box_p_pub.py
   src/dog_p_pub.py
   src/multi_tag_detection.py
+  src/uwb_rl_translation_pub.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

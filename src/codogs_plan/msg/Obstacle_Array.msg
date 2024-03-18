@@ -1,1 +1,0 @@
-Obstacle_msg[] obstacles
